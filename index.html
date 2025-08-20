@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitap & Film Takip</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Temel stiller */
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%);
+        }
+        
+        .page {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Buton stilleri */
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000000;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            background: linear-gradient(135deg, #FFED4E 0%, #FFB84D 100%);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
+            color: #000000;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.4);
+            background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        }
+        
+        /* Kart stilleri */
+        .card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 2px solid #FFD700;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            color: #FFD700;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+            border-color: #FFA500;
+        }
+        
+        /* Yıldız stilleri */
+        .star {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .star.empty {
+            color: #666666;
+        }
+        
+        /* Tab stilleri */
+        .tab-active {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+        
+        /* Input stilleri */
+        .gold-input {
+            background: #1a1a1a;
+            border: 2px solid #FFD700;
+            color: #FFD700;
+        }
+        
+        .gold-input:focus {
+            border-color: #FFA500;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            outline: none;
+        }
+        
+        .gold-input::placeholder {
+            color: #B8860B;
+        }
+        
+        /* Özel altın efektleri */
+        .gold-text {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .black-card {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            border: 1px solid #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Giriş Sayfası -->
+        <div id="splash" class="page active flex items-center justify-center">
+            <div class="text-center p-8">
+                <div class="mb-8">
+                    <div class="mb-6 flex justify-center">
+                        <svg width="120" height="120" viewBox="0 0 120 120" class="drop-shadow-lg">
+                            <!-- Kitap kapağı -->
+                            <rect x="20" y="15" width="70" height="90" rx="4" fill="url(#bookGradient)" stroke="#FFD700" stroke-width="3"/>
+                            <!-- Kitap sayfaları -->
+                            <rect x="25" y="20" width="60" height="80" rx="2" fill="#1a1a1a" stroke="#B8860B" stroke-width="1"/>
+                            <!-- Kitap çizgileri -->
+                            <line x1="30" y1="30" x2="80" y2="30" stroke="#FFD700" stroke-width="1"/>
+                            <line x1="30" y1="40" x2="75" y2="40" stroke="#FFD700" stroke-width="1"/>
+                            <line x1="30" y1="50" x2="80" y2="50" stroke="#FFD700" stroke-width="1"/>
+                            <line x1="30" y1="60" x2="70" y2="60" stroke="#FFD700" stroke-width="1"/>
+                            <!-- Film şeridi -->
+                            <rect x="75" y="35" width="25" height="50" rx="3" fill="url(#filmGradient)" stroke="#FFA500" stroke-width="3"/>
+                            <!-- Film delikleri -->
+                            <circle cx="82" cy="42" r="2" fill="#000000"/>
+                            <circle cx="82" cy="52" r="2" fill="#000000"/>
+                            <circle cx="82" cy="62" r="2" fill="#000000"/>
+                            <circle cx="82" cy="72" r="2" fill="#000000"/>
+                            <circle cx="93" cy="42" r="2" fill="#000000"/>
+                            <circle cx="93" cy="52" r="2" fill="#000000"/>
+                            <circle cx="93" cy="62" r="2" fill="#000000"/>
+                            <circle cx="93" cy="72" r="2" fill="#000000"/>
+                            
+                            <!-- Gradyanlar -->
+                            <defs>
+                                <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="filmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h1 class="text-4xl font-bold gold-text mb-2">Kitap & Film</h1>
+                    <p class="text-xl text-yellow-400">Takip Uygulaması</p>
+                </div>
+                <button onclick="showPage('home')" class="btn-primary px-8 py-4 rounded-full text-lg font-semibold shadow-lg">
+                    Başlayalım ✨
+                </button>
+            </div>
+        </div>
+
+        <!-- Ana Sayfa -->
+        <div id="home" class="page">
+            <!-- Üst Bar -->
+            <div class="bg-black text-white p-4 shadow-lg border-b-2 border-yellow-500">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg width="32" height="32" viewBox="0 0 120 120" class="mr-3">
+                            <!-- Kitap kapağı -->
+                            <rect x="20" y="15" width="70" height="90" rx="4" fill="url(#bookGradientSmall)" stroke="#FFD700" stroke-width="2"/>
+                            <!-- Kitap sayfaları -->
+                            <rect x="25" y="20" width="60" height="80" rx="2" fill="#1a1a1a" stroke="#B8860B" stroke-width="1"/>
+                            <!-- Kitap çizgileri -->
+                            <line x1="30" y1="30" x2="80" y2="30" stroke="#FFD700" stroke-width="1"/>
+                            <line x1="30" y1="40" x2="75" y2="40" stroke="#FFD700" stroke-width="1"/>
+                            <line x1="30" y1="50" x2="80" y2="50" stroke="#FFD700" stroke-width="1"/>
+                            <line x1="30" y1="60" x2="70" y2="60" stroke="#FFD700" stroke-width="1"/>
+                            <!-- Film şeridi -->
+                            <rect x="75" y="35" width="25" height="50" rx="3" fill="url(#filmGradientSmall)" stroke="#FFA500" stroke-width="2"/>
+                            <!-- Film delikleri -->
+                            <circle cx="82" cy="42" r="2" fill="#000000"/>
+                            <circle cx="82" cy="52" r="2" fill="#000000"/>
+                            <circle cx="82" cy="62" r="2" fill="#000000"/>
+                            <circle cx="82" cy="72" r="2" fill="#000000"/>
+                            <circle cx="93" cy="42" r="2" fill="#000000"/>
+                            <circle cx="93" cy="52" r="2" fill="#000000"/>
+                            <circle cx="93" cy="62" r="2" fill="#000000"/>
+                            <circle cx="93" cy="72" r="2" fill="#000000"/>
+                            
+                            <!-- Gradyanlar -->
+                            <defs>
+                                <linearGradient id="bookGradientSmall" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="filmGradientSmall" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <h1 class="text-2xl font-bold gold-text">Koleksiyonum</h1>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="showPage('stats')" class="p-2 hover:bg-yellow-600 hover:bg-opacity-20 rounded-lg transition-colors text-yellow-400">
+                            📊
+                        </button>
+                        <button onclick="showPage('settings')" class="p-2 hover:bg-yellow-600 hover:bg-opacity-20 rounded-lg transition-colors text-yellow-400">
+                            ⚙️
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Menü -->
+            <div class="flex bg-black shadow-sm border-b border-yellow-600">
+                <button id="booksTab" class="flex-1 py-4 text-center font-semibold tab-active" onclick="switchTab('books')">
+                    📚 Kitaplar
+                </button>
+                <button id="moviesTab" class="flex-1 py-4 text-center font-semibold bg-gray-900 text-yellow-600 border-l border-yellow-600" onclick="switchTab('movies')">
+                    🎬 Filmler
+                </button>
+            </div>
+
+            <!-- Kitaplar Bölümü -->
+            <div id="booksContent" class="p-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold gold-text">Kitaplarım</h2>
+                    <button onclick="showAddForm('book')" class="btn-primary px-6 py-3 rounded-lg font-semibold">
+                        ➕ Kitap Ekle
+                    </button>
+                </div>
+                <div id="booksList" class="space-y-4">
+                    <!-- Kitaplar buraya gelecek -->
+                </div>
+            </div>
+
+            <!-- Filmler Bölümü -->
+            <div id="moviesContent" class="p-4 hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold gold-text">Filmlerim</h2>
+                    <button onclick="showAddForm('movie')" class="btn-primary px-6 py-3 rounded-lg font-semibold">
+                        ➕ Film Ekle
+                    </button>
+                </div>
+                <div id="moviesList" class="space-y-4">
+                    <!-- Filmler buraya gelecek -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Ekleme Sayfası -->
+        <div id="addForm" class="page">
+            <div class="bg-black text-white p-4 border-b-2 border-yellow-500">
+                <div class="flex items-center">
+                    <button onclick="showPage('home')" class="mr-4 text-2xl text-yellow-400 hover:text-yellow-300">⬅️</button>
+                    <h1 id="formTitle" class="text-xl font-bold gold-text">Kitap Ekle</h1>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <form id="itemForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold gold-text mb-2">📝 Ad</label>
+                        <input type="text" id="itemName" class="w-full p-4 gold-input rounded-lg" placeholder="Kitap/Film adı" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold gold-text mb-2">👤 Yazar/Yönetmen</label>
+                        <input type="text" id="itemAuthor" class="w-full p-4 gold-input rounded-lg" placeholder="Yazar veya yönetmen" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold gold-text mb-2">🏷️ Tür</label>
+                        <select id="itemGenre" class="w-full p-4 gold-input rounded-lg" required>
+                            <option value="">Tür seçin</option>
+                            <option value="Klasik">Klasik</option>
+                            <option value="Roman">Roman</option>
+                            <option value="Bilim Kurgu">Bilim Kurgu</option>
+                            <option value="Fantastik">Fantastik</option>
+                            <option value="Polisiye">Polisiye</option>
+                            <option value="Aksiyon">Aksiyon</option>
+                            <option value="Komedi">Komedi</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Korku">Korku</option>
+                            <option value="Romantik">Romantik</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold gold-text mb-2">⭐ Puan</label>
+                        <div class="flex space-x-2 justify-center py-2">
+                            <button type="button" class="star-btn text-3xl text-gray-600 hover:text-yellow-500 transition-colors" data-rating="1" onclick="setRating(1)">⭐</button>
+                            <button type="button" class="star-btn text-3xl text-gray-600 hover:text-yellow-500 transition-colors" data-rating="2" onclick="setRating(2)">⭐</button>
+                            <button type="button" class="star-btn text-3xl text-gray-600 hover:text-yellow-500 transition-colors" data-rating="3" onclick="setRating(3)">⭐</button>
+                            <button type="button" class="star-btn text-3xl text-gray-600 hover:text-yellow-500 transition-colors" data-rating="4" onclick="setRating(4)">⭐</button>
+                            <button type="button" class="star-btn text-3xl text-gray-600 hover:text-yellow-500 transition-colors" data-rating="5" onclick="setRating(5)">⭐</button>
+                        </div>
+                        <input type="hidden" id="itemRating" value="0" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold gold-text mb-2">💭 Yorum</label>
+                        <textarea id="itemComment" class="w-full p-4 gold-input rounded-lg" rows="4" placeholder="Düşüncelerinizi yazın..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full btn-primary py-4 rounded-lg text-lg font-semibold">
+                        ✅ Ekle
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- İstatistikler Sayfası -->
+        <div id="stats" class="page">
+            <div class="bg-black text-white p-4 border-b-2 border-yellow-500">
+                <div class="flex items-center">
+                    <button onclick="showPage('home')" class="mr-4 text-2xl text-yellow-400 hover:text-yellow-300">⬅️</button>
+                    <h1 class="text-xl font-bold gold-text">📊 İstatistikler</h1>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <!-- Genel Sayılar -->
+                <div class="card p-6 rounded-xl">
+                    <h3 class="text-lg font-bold mb-4 gold-text">📈 Genel Durum</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-4 black-card rounded-lg">
+                            <div class="text-3xl font-bold gold-text" id="totalBooks">0</div>
+                            <div class="text-sm text-yellow-600">Toplam Kitap</div>
+                        </div>
+                        <div class="text-center p-4 black-card rounded-lg">
+                            <div class="text-3xl font-bold gold-text" id="totalMovies">0</div>
+                            <div class="text-sm text-yellow-600">Toplam Film</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ortalama Puanlar -->
+                <div class="card p-6 rounded-xl">
+                    <h3 class="text-lg font-bold mb-4 gold-text">⭐ Ortalama Puanlar</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-yellow-400">📚 Kitaplar</span>
+                            <div class="flex items-center">
+                                <span class="text-lg font-bold mr-2 gold-text" id="avgBookRating">0.0</span>
+                                <div id="avgBookStars" class="flex"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-yellow-400">🎬 Filmler</span>
+                            <div class="flex items-center">
+                                <span class="text-lg font-bold mr-2 gold-text" id="avgMovieRating">0.0</span>
+                                <div id="avgMovieStars" class="flex"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- En Sevilen Türler -->
+                <div class="card p-6 rounded-xl">
+                    <h3 class="text-lg font-bold mb-4 gold-text">🏆 En Sevilen Türler</h3>
+                    <div id="favoriteGenres" class="space-y-2">
+                        <p class="text-yellow-600 text-center">Henüz veri yok</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ayarlar Sayfası -->
+        <div id="settings" class="page">
+            <div class="bg-black text-white p-4 border-b-2 border-yellow-500">
+                <div class="flex items-center">
+                    <button onclick="showPage('home')" class="mr-4 text-2xl text-yellow-400 hover:text-yellow-300">⬅️</button>
+                    <h1 class="text-xl font-bold gold-text">⚙️ Ayarlar</h1>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <div class="card p-6 rounded-xl">
+                    <h3 class="text-lg font-bold mb-4 gold-text">💾 Veri Yönetimi</h3>
+                    <div class="space-y-4">
+                        <button onclick="exportData()" class="w-full btn-primary py-3 rounded-lg font-semibold">
+                            📤 Verileri Dışa Aktar
+                        </button>
+                        <button onclick="importData()" class="w-full btn-secondary py-3 rounded-lg font-semibold">
+                            📥 Verileri İçe Aktar
+                        </button>
+                        <button onclick="clearAllData()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-colors border-2 border-red-500">
+                            🗑️ Tüm Verileri Sil
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Geliştirici İmzası -->
+                <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-black via-gray-900 to-black p-6 text-white shadow-2xl border-2 border-yellow-500">
+                    <!-- Arka plan efekti -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-600/10 to-yellow-400/10"></div>
+                    <div class="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-yellow-500/20 blur-xl"></div>
+                    <div class="absolute -bottom-4 -left-4 h-32 w-32 rounded-full bg-yellow-600/20 blur-xl"></div>
+                    
+                    <div class="relative text-center">
+                        <!-- Avatar -->
+                        <div class="mb-6">
+                            <div class="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg ring-4 ring-yellow-500/30 flex items-center justify-center border-2 border-yellow-500">
+                                <span class="text-2xl font-bold text-black tracking-wider">NNT</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Ana bilgiler -->
+                        <h3 class="mb-6 text-2xl font-bold gold-text">NNT</h3>
+                        
+                        <!-- Atatürk'ün Sözü -->
+                        <div class="border-t border-yellow-500/30 pt-6">
+                            <p class="text-sm italic text-yellow-300 leading-relaxed">
+                                "Sanatsız kalan bir milletin, hayat damarlarından biri kopmuş demektir."
+                            </p>
+                            <p class="mt-2 text-xs text-yellow-600">
+                                - Mustafa Kemal Atatürk
+                            </p>
+                        </div>
+                        
+                        <!-- GitHub linki (opsiyonel) -->
+                        <div class="mt-4">
+                            <div class="inline-flex items-center rounded-full bg-yellow-500/20 px-4 py-2 text-xs backdrop-blur-sm border border-yellow-500/30">
+                                <span class="mr-2">⭐</span>
+                                <span class="text-yellow-300">Made with passion</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global değişkenler
+        let currentItemType = 'book';
+        let currentRating = 0;
+        let books = [];
+        let movies = [];
+
+        // Sayfa geçişleri
+        function showPage(pageId) {
+            // Tüm sayfaları gizle
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // İstenen sayfayı göster
+            document.getElementById(pageId).classList.add('active');
+            
+            // Eğer ana sayfaya dönüyorsak listeyi güncelle
+            if (pageId === 'home') {
+                updateLists();
+            }
+            // Eğer istatistik sayfasına gidiyorsak istatistikleri güncelle
+            if (pageId === 'stats') {
+                updateStats();
+            }
+        }
+
+        // Tab değiştirme
+        function switchTab(tab) {
+            // Tab butonlarını güncelle
+            document.getElementById('booksTab').className = 'flex-1 py-4 text-center font-semibold bg-gray-900 text-yellow-600 border-r border-yellow-600';
+            document.getElementById('moviesTab').className = 'flex-1 py-4 text-center font-semibold bg-gray-900 text-yellow-600 border-l border-yellow-600';
+            
+            // İçerikleri gizle
+            document.getElementById('booksContent').classList.add('hidden');
+            document.getElementById('moviesContent').classList.add('hidden');
+            
+            if (tab === 'books') {
+                document.getElementById('booksTab').className = 'flex-1 py-4 text-center font-semibold tab-active';
+                document.getElementById('booksContent').classList.remove('hidden');
+            } else {
+                document.getElementById('moviesTab').className = 'flex-1 py-4 text-center font-semibold tab-active';
+                document.getElementById('moviesContent').classList.remove('hidden');
+            }
+        }
+
+        // Ekleme formunu göster
+        function showAddForm(type) {
+            currentItemType = type;
+            document.getElementById('formTitle').textContent = type === 'book' ? '📚 Kitap Ekle' : '🎬 Film Ekle';
+            resetForm();
+            showPage('addForm');
+        }
+
+        // Formu temizle
+        function resetForm() {
+            document.getElementById('itemForm').reset();
+            setRating(0);
+        }
+
+        // Puan belirleme
+        function setRating(rating) {
+            currentRating = rating;
+            document.getElementById('itemRating').value = rating;
+            
+            // Yıldızları güncelle
+            document.querySelectorAll('.star-btn').forEach((star, index) => {
+                if (index < rating) {
+                    star.className = 'star-btn text-3xl star transition-colors';
+                } else {
+                    star.className = 'star-btn text-3xl text-gray-600 hover:text-yellow-500 transition-colors';
+                }
+            });
+        }
+
+        // Form gönderme
+        document.getElementById('itemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Form verilerini al
+            const newItem = {
+                name: document.getElementById('itemName').value,
+                author: document.getElementById('itemAuthor').value,
+                genre: document.getElementById('itemGenre').value,
+                rating: parseInt(document.getElementById('itemRating').value),
+                comment: document.getElementById('itemComment').value,
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            // Uygun diziye ekle
+            if (currentItemType === 'book') {
+                books.push(newItem);
+            } else {
+                movies.push(newItem);
+            }
+            
+            // Verileri kaydet
+            saveData();
+            
+            // Ana sayfaya dön
+            showPage('home');
+            
+            // Başarı mesajı
+            alert(`${currentItemType === 'book' ? 'Kitap' : 'Film'} başarıyla eklendi! ✨`);
+        });
+
+        // Listeleri güncelle
+        function updateLists() {
+            updateBooksList();
+            updateMoviesList();
+        }
+
+        // Kitap listesini güncelle
+        function updateBooksList() {
+            const container = document.getElementById('booksList');
+            
+            if (books.length === 0) {
+                container.innerHTML = '<div class="text-center text-yellow-600 py-8">📚 Henüz kitap eklenmemiş</div>';
+                return;
+            }
+            
+            let html = '';
+            books.forEach((book, index) => {
+                const stars = '⭐'.repeat(book.rating) + '☆'.repeat(5 - book.rating);
+                html += `
+                    <div class="card p-4 rounded-lg cursor-pointer" onclick="showDetails('book', ${index})">
+                        <div class="flex">
+                            <div class="w-16 h-20 bg-gradient-to-b from-yellow-500 to-yellow-600 rounded-lg mr-4 flex items-center justify-center text-2xl border-2 border-yellow-400">
+                                📖
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg gold-text">${book.name}</h3>
+                                <p class="text-yellow-400">${book.author}</p>
+                                <p class="text-sm text-yellow-600">${book.genre}</p>
+                                <div class="text-lg mt-1">${stars}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Film listesini güncelle
+        function updateMoviesList() {
+            const container = document.getElementById('moviesList');
+            
+            if (movies.length === 0) {
+                container.innerHTML = '<div class="text-center text-yellow-600 py-8">🎬 Henüz film eklenmemiş</div>';
+                return;
+            }
+            
+            let html = '';
+            movies.forEach((movie, index) => {
+                const stars = '⭐'.repeat(movie.rating) + '☆'.repeat(5 - movie.rating);
+                html += `
+                    <div class="card p-4 rounded-lg cursor-pointer" onclick="showDetails('movie', ${index})">
+                        <div class="flex">
+                            <div class="w-16 h-20 bg-gradient-to-b from-yellow-500 to-yellow-600 rounded-lg mr-4 flex items-center justify-center text-2xl border-2 border-yellow-400">
+                                🎬
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg gold-text">${movie.name}</h3>
+                                <p class="text-yellow-400">${movie.author}</p>
+                                <p class="text-sm text-yellow-600">${movie.genre}</p>
+                                <div class="text-lg mt-1">${stars}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Detay gösterme (basit alert ile)
+        function showDetails(type, index) {
+            const items = type === 'book' ? books : movies;
+            const item = items[index];
+            const stars = '⭐'.repeat(item.rating);
+            
+            alert(`${type === 'book' ? '📚' : '🎬'} ${item.name}\n\n👤 ${item.author}\n🏷️ ${item.genre}\n⭐ ${stars} (${item.rating}/5)\n\n💭 ${item.comment || 'Yorum yok'}`);
+        }
+
+        // İstatistikleri güncelle
+        function updateStats() {
+            // Toplam sayılar
+            document.getElementById('totalBooks').textContent = books.length;
+            document.getElementById('totalMovies').textContent = movies.length;
+            
+            // Ortalama puanlar
+            const avgBookRating = books.length > 0 ? (books.reduce((sum, book) => sum + book.rating, 0) / books.length).toFixed(1) : '0.0';
+            const avgMovieRating = movies.length > 0 ? (movies.reduce((sum, movie) => sum + movie.rating, 0) / movies.length).toFixed(1) : '0.0';
+            
+            document.getElementById('avgBookRating').textContent = avgBookRating;
+            document.getElementById('avgMovieRating').textContent = avgMovieRating;
+            
+            // Yıldızları güncelle
+            updateStarDisplay('avgBookStars', Math.round(avgBookRating));
+            updateStarDisplay('avgMovieStars', Math.round(avgMovieRating));
+            
+            // En sevilen türler
+            updateFavoriteGenres();
+        }
+
+        // Yıldız gösterimi
+        function updateStarDisplay(elementId, rating) {
+            const container = document.getElementById(elementId);
+            const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+            container.innerHTML = stars;
+        }
+
+        // En sevilen türleri güncelle
+        function updateFavoriteGenres() {
+            const genreCounts = {};
+            
+            // Tüm türleri say
+            [...books, ...movies].forEach(item => {
+                genreCounts[item.genre] = (genreCounts[item.genre] || 0) + 1;
+            });
+            
+            // Sırala ve göster
+            const sortedGenres = Object.entries(genreCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+            
+            const container = document.getElementById('favoriteGenres');
+            
+            if (sortedGenres.length === 0) {
+                container.innerHTML = '<p class="text-yellow-600 text-center">Henüz veri yok</p>';
+                return;
+            }
+            
+            let html = '';
+            sortedGenres.forEach(([genre, count]) => {
+                html += `
+                    <div class="flex justify-between items-center p-3 black-card rounded-lg">
+                        <span class="font-semibold text-yellow-400">${genre}</span>
+                        <span class="text-yellow-600">${count} adet</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Veri kaydetme
+        function saveData() {
+            localStorage.setItem('books', JSON.stringify(books));
+            localStorage.setItem('movies', JSON.stringify(movies));
+        }
+
+        // Veri yükleme
+        function loadData() {
+            const savedBooks = localStorage.getItem('books');
+            const savedMovies = localStorage.getItem('movies');
+            
+            if (savedBooks) books = JSON.parse(savedBooks);
+            if (savedMovies) movies = JSON.parse(savedMovies);
+        }
+
+        // Veri dışa aktarma
+        function exportData() {
+            const data = {
+                books: books,
+                movies: movies,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'kitap-film-yedek.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('📤 Veriler başarıyla dışa aktarıldı! ✨');
+        }
+
+        // Veri içe aktarma
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.books && data.movies) {
+                                books = data.books;
+                                movies = data.movies;
+                                saveData();
+                                updateLists();
+                                alert('📥 Veriler başarıyla içe aktarıldı! ✨');
+                            } else {
+                                alert('❌ Geçersiz dosya formatı!');
+                            }
+                        } catch (error) {
+                            alert('❌ Dosya okuma hatası!');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            
+            input.click();
+        }
+
+        // Tüm verileri sil
+        function clearAllData() {
+            if (confirm('⚠️ Tüm veriler silinecek! Emin misiniz?')) {
+                books = [];
+                movies = [];
+                saveData();
+                updateLists();
+                alert('🗑️ Tüm veriler silindi!');
+            }
+        }
+
+        // Uygulama başlatma
+        function initApp() {
+            loadData();
+            updateLists();
+        }
+
+        // Sayfa yüklendiğinde uygulamayı başlat
+        window.addEventListener('load', initApp);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97214640655bd0ec',t:'MTc1NTY4NjQ0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
